@@ -5,10 +5,10 @@ import { SeriesController } from "../controllers/series.controller.js";
 
 const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
-router.get("/", SeriesController.getAll);
-router.get("/:id", SeriesController.get);
+router.get("/",authenticate, SeriesController.getAll);
+router.get("/:id",authenticate, SeriesController.get);
 router.post("/", validate(SeriesValidationSchema.add), SeriesController.add);
-router.delete("/:id", SeriesController.delete);
-router.patch("/:id", SeriesController.update);
+router.delete("/:id",authenticate, SeriesController.delete);
+router.patch("/:id",authenticate, SeriesController.update);
 
 export default router;

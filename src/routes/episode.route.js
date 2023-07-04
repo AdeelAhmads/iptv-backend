@@ -5,10 +5,10 @@ import { EpisodeController } from "../controllers/episode.controller.js";
 
 const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
-router.get("/", EpisodeController.getAll);
-router.get("/:id", EpisodeController.get);
+router.get("/",authenticate, EpisodeController.getAll);
+router.get("/:id",authenticate, EpisodeController.get);
 router.post("/", validate(EpisodeValidationSchema.add), EpisodeController.add);
-router.delete("/:id", EpisodeController.delete);
-router.patch("/:id", EpisodeController.update);
+router.delete("/:id",authenticate, EpisodeController.delete);
+router.patch("/:id",authenticate, EpisodeController.update);
 
 export default router;

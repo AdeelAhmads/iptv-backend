@@ -1,6 +1,10 @@
+
 import { UserModel } from "../models/index.js";
+import { StreamModel } from "../models/index.js";
 import jwt from "jsonwebtoken";
+import config from "../config/index.js";
 import passwordHash from 'password-hash';
+import mongoose from "mongoose";
 export const UserService = {
 	getAll: async () => {
 		return UserModel.find();
@@ -16,7 +20,7 @@ export const UserService = {
 			if (user.id === id) {
 				return await UserModel.findById(id);
 			}
-			
+
 		}
 
 	},
@@ -25,25 +29,19 @@ export const UserService = {
 		let data;
 		data = await UserModel.find({ email: body.email });
 		// Secret key used to sign the token
+		console.log(data.length);
 		if (data.length == 0) {
-			const data = UserModel.create(body);
-			const token = jwt.sign(body, secretKey);
+			console.log('condition is true');
+
+			const data = await UserModel.create(body);
+			// const token = jwt.sign(body, config.env.jwtSecret);
+	
 			const hashedPassword = passwordHash.generate(body.password);
 			delete body.password;
-			body.password = hashedPassword;
+			data.password = hashedPassword;
 
-			// console.log(body);
-
-			console.log(data);
-
-			data.token = token;
-			console.log('data');
 			return data;
 		}
-		else {
-			return "This user is already available";
-		}
-
 
 	},
 
@@ -99,6 +97,51 @@ export const UserService = {
 
 
 
+	},
+	getUser:async (body)=>{
+
+		const users = await UserModel.find()
+
+		for (const user of users) {
+
+			if (user.email === body.email) {
+                if(passwordHash.verify(body.password, user.password)){
+
+                    const token = jwt.sign(body, config.env.jwtSecret);
+                    return {user,token}
+
+                }
+              
+			}
+
+		}
+	},
+	getStreams:async (id)=>{
+
+
+		const data = await UserModel.aggregate([
+			{
+			  $match: {
+				_id: new mongoose.Types.ObjectId(id),
+			  },
+			},
+			{
+			  $lookup: {
+				from: "stream",
+				localField: "user_id",
+				foreignField: "_id",
+				as: "stream_record",
+			  },
+			},
+		  ]);
+		
+		return data;
+		// const data= await StreamModel.find({ user_id: id })
+		// console.log(data);
+		// return data;
+		
+	
 	}
+
 
 };

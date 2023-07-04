@@ -5,10 +5,10 @@ import { StreamController } from "../controllers/stream.controller.js";
 
 const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
-router.get("/", StreamController.getAll);
-router.get("/:id", StreamController.get);
+router.get("/",authenticate, StreamController.getAll);
+router.get("/:id",authenticate, StreamController.get);
 router.post("/", validate(StreamValidationSchema.add), StreamController.add);
-router.delete("/:id", StreamController.delete);
-router.patch("/:id", StreamController.update);
+router.delete("/:id",authenticate, StreamController.delete);
+router.patch("/:id",authenticate, StreamController.update);
 
 export default router;

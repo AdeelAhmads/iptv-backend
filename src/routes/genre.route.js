@@ -5,10 +5,10 @@ import { GenreController } from "../controllers/genre.controller.js";
 
 const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
-router.get("/", GenreController.getAll);
-router.get("/:id", GenreController.get);
+router.get("/",authenticate, GenreController.getAll);
+router.get("/:id",authenticate, GenreController.get);
 router.post("/", validate(GenreValidationSchema.add), GenreController.add);
-router.delete("/:id", GenreController.delete);
-router.patch("/:id", GenreController.update);
+router.delete("/:id",authenticate, GenreController.delete);
+router.patch("/:id",authenticate, GenreController.update);
 
 export default router;

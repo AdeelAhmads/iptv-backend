@@ -30,10 +30,37 @@ export const UserController = {
 	add: async (req, res) => {
 		try {
 			const data = await UserService.add(req.body);
-			if(data=="This user is already available"){
+			if(!data){
                 return httpResponse.CONFLICT(res, data);
             }else{
                 return httpResponse.CREATED(res, data);
+            }
+			// return httpResponse.CREATED(res, data);
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+	},
+	getUser: async (req,res) => {
+		try {
+			const data = await UserService.getUser(req.body);
+			if(!data){
+                return httpResponse.NOT_FOUND(res, data);
+            }else{
+                return httpResponse.SUCCESS(res, data);
+            }
+			// return httpResponse.CREATED(res, data);
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+
+	},
+	getStreams:async (req,res)=>{
+		try {
+			const data = await UserService.getStreams(req.params.id);
+			if(!data){
+                return httpResponse.NOT_FOUND(res, data);
+            }else{
+                return httpResponse.SUCCESS(res, data);
             }
 			// return httpResponse.CREATED(res, data);
 		} catch (error) {

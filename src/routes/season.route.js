@@ -5,10 +5,10 @@ import { SeasonController } from "../controllers/season.controller.js";
 
 const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
-router.get("/", SeasonController.getAll);
-router.get("/:id", SeasonController.get);
+router.get("/",authenticate, SeasonController.getAll);
+router.get("/:id",authenticate, SeasonController.get);
 router.post("/", validate(SeasonValidationSchema.add), SeasonController.add);
-router.delete("/:id", SeasonController.delete);
-router.patch("/:id", SeasonController.update);
+router.delete("/:id",authenticate, SeasonController.delete);
+router.patch("/:id",authenticate, SeasonController.update);
 
 export default router;

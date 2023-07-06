@@ -26,7 +26,31 @@ export const GenreController = {
             return httpResponse.INTERNAL_SERVER_ERROR(res, error);
         }
     },
-
+    getSeries:async (req,res)=>{
+       
+        try {
+			const data = await GenreService.getSeries(req.params.id);
+			if (!data) {
+				return httpResponse.NOT_FOUND(res);
+			} else {
+				return httpResponse.SUCCESS(res, data);
+			}
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+    },
+    getSeasons:async (req,res)=>{
+        try {
+			const data = await GenreService.getSeasons(req.params.id);
+			if (!data) {
+				return httpResponse.NOT_FOUND(res);
+			} else {
+				return httpResponse.SUCCESS(res, data);
+			}
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+    },
     add: async (req, res) => {
         try {
             console.log(req.body);

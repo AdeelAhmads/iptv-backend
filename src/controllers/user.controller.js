@@ -30,38 +30,51 @@ export const UserController = {
 	add: async (req, res) => {
 		try {
 			const data = await UserService.add(req.body);
-			if(!data){
-                return httpResponse.CONFLICT(res, data);
-            }else{
-                return httpResponse.CREATED(res, data);
-            }
+			if (!data) {
+				return httpResponse.CONFLICT(res, data);
+			} else {
+				return httpResponse.CREATED(res, data);
+			}
 			// return httpResponse.CREATED(res, data);
 		} catch (error) {
 			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
 		}
 	},
-	getUser: async (req,res) => {
+	getUser: async (req, res) => {
 		try {
 			const data = await UserService.getUser(req.body);
-			if(!data){
-                return httpResponse.NOT_FOUND(res, data);
-            }else{
-                return httpResponse.SUCCESS(res, data);
-            }
+			if (!data) {
+				return httpResponse.NOT_FOUND(res, data);
+			} else {
+				return httpResponse.SUCCESS(res, data);
+			}
 			// return httpResponse.CREATED(res, data);
 		} catch (error) {
 			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
 		}
 
 	},
-	getStreams:async (req,res)=>{
+	getStreams: async (req, res) => {
 		try {
 			const data = await UserService.getStreams(req.params.id);
-			if(!data){
-                return httpResponse.NOT_FOUND(res, data);
-            }else{
-                return httpResponse.SUCCESS(res, data);
-            }
+			if (!data) {
+				return httpResponse.NOT_FOUND(res, data);
+			} else {
+				return httpResponse.SUCCESS(res, data);
+			}
+			// return httpResponse.CREATED(res, data);
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+	},
+	getStream: async (req, res) => {
+		try {
+			const data = await UserService.getStream(req.params.id, req.params.streamId);
+			if (!data) {
+				return httpResponse.NOT_FOUND(res);
+			} else {
+				return httpResponse.SUCCESS(res, data);
+			}
 			// return httpResponse.CREATED(res, data);
 		} catch (error) {
 			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
@@ -73,6 +86,21 @@ export const UserController = {
 
 			const data = await UserService.delete(req.params.id);
 			// const data = await UserService.get(req.params.id);
+			if (!data) {
+				return httpResponse.NOT_FOUND(res, data)
+			}
+			else {
+				return httpResponse.SUCCESS(res, data);
+			}
+		} catch (error) {
+			return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+		}
+	},
+	deleteStream: async (req, res) => {
+		try {
+
+			const data = await UserService.deleteStream(req.params.id, req.params.streamId);
+
 			if (!data) {
 				return httpResponse.NOT_FOUND(res, data)
 			}

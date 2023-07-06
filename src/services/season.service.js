@@ -1,6 +1,7 @@
 import { SeasonModel } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import passwordHash from 'password-hash';
+import mongoose from "mongoose";
 export const SeasonService = {
     getAll: async () => {
         return SeasonModel.find();
@@ -20,23 +21,32 @@ export const SeasonService = {
         }
 
     },
+    getEpisodes:async (id)=>{
+        const data = await SeasonModel.aggregate([
+			{
+				$match: {
+					_id: new mongoose.Types.ObjectId(id),
+				},
+			},
+			{
+				$lookup: {
+					from: "episodes",
+					localField: "_id",
+					foreignField: "season_id",
+					as: "episode_record",
+				},
+			},
+		]);
+		return data;
+    },
 
     add: async (body) => {
         let data;
         data = await SeasonModel.find({ name: body.name });
-        // Secret key used to sign the token
+        
         if (data.length == 0) {
             const data = SeasonModel.create(body);
             // const token = jwt.sign(body, secretKey);
-            // const hashedPassword = passwordHash.generate(body.password);
-            // delete body.password;
-            // body.password = hashedPassword;
-
-
-            // console.log(data);
-
-            // data.token = token;
-            // console.log('data');
             return data;
         }
         else {
@@ -47,8 +57,7 @@ export const SeasonService = {
     },
 
     delete: async (id) => {
-        // console.log('deleted request');
-        // console.log(req);
+       
         const seasons = await SeasonModel.find()
 
         // console.log(users);

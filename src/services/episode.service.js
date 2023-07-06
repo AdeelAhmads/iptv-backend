@@ -1,6 +1,7 @@
 import { EpisodeModel } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import passwordHash from 'password-hash';
+import mongoose from "mongoose";
 export const EpisodeService = {
     getAll: async () => {
         return EpisodeModel.find();
@@ -19,6 +20,24 @@ export const EpisodeService = {
            
         }
 
+    },
+    getStream:async (id)=>{
+        const data = await EpisodeModel.aggregate([
+			{
+				$match: {
+					_id: new mongoose.Types.ObjectId(id),
+				},
+			},
+			{
+				$lookup: {
+					from: "streams",
+					localField: "_id",
+					foreignField: "episode_id",
+					as: "streams_record",
+				},
+			},
+		]);
+		return data;
     },
 
     add: async (body) => {

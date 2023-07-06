@@ -28,14 +28,14 @@ export const UserService = {
 	add: async (body) => {
 		let data;
 		data = await UserModel.find({ email: body.email });
-		// Secret key used to sign the token
+
 		console.log(data.length);
 		if (data.length == 0) {
 			console.log('condition is true');
 
 			const data = await UserModel.create(body);
 			// const token = jwt.sign(body, config.env.jwtSecret);
-	
+
 			const hashedPassword = passwordHash.generate(body.password);
 			delete body.password;
 			data.password = hashedPassword;
@@ -46,17 +46,24 @@ export const UserService = {
 	},
 
 	delete: async (id) => {
-		// console.log('deleted request');
-		// console.log(req);
 		const users = await UserModel.find()
-
-		// console.log(users);
 		for (const user of users) {
 
 			if (user.id === id) {
 				return await UserModel.findByIdAndDelete(id);
 			}
 
+		}
+
+	},
+	deleteStream: async (id, streamId) => {
+		const streams = await StreamModel.find()
+
+		for (const stream of streams) {
+
+			if (stream.id === streamId) {
+				return await StreamModel.findByIdAndDelete(stream.id);
+			}
 		}
 
 	},
@@ -98,49 +105,61 @@ export const UserService = {
 
 
 	},
-	getUser:async (body)=>{
+	getUser: async (body) => {
 
 		const users = await UserModel.find()
 
 		for (const user of users) {
 
 			if (user.email === body.email) {
-                if(passwordHash.verify(body.password, user.password)){
+				if (passwordHash.verify(body.password, user.password)) {
 
-                    const token = jwt.sign(body, config.env.jwtSecret);
-                    return {user,token}
+					const token = jwt.sign(body, config.env.jwtSecret);
+					return { user, token }
 
-                }
-              
+				}
+
 			}
 
 		}
 	},
-	getStreams:async (id)=>{
+	getStreams: async (id) => {
 
 
 		const data = await UserModel.aggregate([
 			{
-			  $match: {
-				_id: new mongoose.Types.ObjectId(id),
-			  },
+				$match: {
+					_id: new mongoose.Types.ObjectId(id),
+				},
 			},
 			{
-			  $lookup: {
-				from: "stream",
-				localField: "user_id",
-				foreignField: "_id",
-				as: "stream_record",
-			  },
+				$lookup: {
+					from: "streams",
+					localField: "_id",
+					foreignField: "user_id",
+					as: "stream_record",
+				},
 			},
-		  ]);
-		
+		]);
+
 		return data;
-		// const data= await StreamModel.find({ user_id: id })
-		// console.log(data);
-		// return data;
-		
-	
+
+	},
+	getStream: async (id, streamId) => {
+
+		const data = await StreamModel.aggregate([
+			{
+				$match: {
+					_id: new mongoose.Types.ObjectId(streamId),
+					user_id: mongoose.Types.ObjectId(id)
+				},
+			},
+
+		]);
+
+		return data
+
+
 	}
 
 

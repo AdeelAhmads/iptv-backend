@@ -1,6 +1,7 @@
 import { StreamModel } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import passwordHash from 'password-hash';
+import mongoose from "mongoose";
 export const StreamService = {
     getAll: async () => {
         return StreamModel.find();
@@ -9,13 +10,7 @@ export const StreamService = {
     get: async (id) => {
 
         const streams = await StreamModel.find()
-        // console.log(streams);
-    //    console.log("body id:"+id);
-        // console.log(streams);
         for (const stream of streams) {
-            console.log(stream);
-        //    console.log(`stream.id: ${stream.id}`);
-
             if (stream.id === id) {
 
                 return await StreamModel.findById(id);
@@ -23,38 +18,219 @@ export const StreamService = {
         }
 
     },
+    getGenre: async (id) => {
+        const data = await StreamModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "episodes",
+                    localField: "episode_id",
+                    foreignField: "_id",
+                    as: "episode_record",
+                },
+            }, 
+            {
+                $lookup: {
+                    from: "seasons", 
+                    let: { seasonId: "$episode_record.season_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$seasonId"] },
+                        },
+                      },
+                    ],
+                   
+                    as: "season_record"
+                }
+            },{
+                $lookup:{
+                    from:"series",
+                    let: { seriesId: "$season_record.series_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$seriesId"] },
+                        },
+                      },
+                    ],
+                   
+                    as:"series_record",
+                }
+            },{
+                $lookup:{
+                    from:"genres",
+                    let: { genreId: "$series_record.genre_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$genreId"] },
+                        },
+                      },
+                    ],
+                   
+                    as:"genre_record",
+                }
+            }
+          
 
-    add: async (body) => {
-        // let data;
-        // data = await StreamModel.find({ time: body.name });
-        // Secret key used to sign the token
-        // if (data.length == 0) {
-            const data = StreamModel.create(body);
-            // const token = jwt.sign(body, secretKey);
-            // const hashedPassword = passwordHash.generate(body.password);
-            // delete body.password;
-            // body.password = hashedPassword;
+        ]);
+        return data;
+    },
+    getSeries: async (id) => {
+        const data = await StreamModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "episodes",
+                    localField: "episode_id",
+                    foreignField: "_id",
+                    as: "episode_record",
+                },
+            }, 
+            {
+                $lookup: {
+                    from: "seasons", 
+                    let: { seasonId: "$episode_record.season_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$seasonId"] },
+                        },
+                      },
+                    ],
+                   
+                    as: "season_record"
+                }
+            },{
+                $lookup:{
+                    from:"series",
+                    let: { seriesId: "$season_record.series_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$seriesId"] },
+                        },
+                      },
+                    ],
+                   
+                    as:"series_record",
+                }
+            }
+            // {
+            //     $project: {
+            //         _id: 0,
+            //         seasons: 1
+            //     }
+            // }
 
+        ]);
+        return data;
 
-            // console.log(data);
+    },
+    getSeason: async (id) => {
 
-            // data.token = token;
-            // console.log('data');
-            return data;
-        // }
-        // else {
-        //     return "This stream is already available"
-        // }
+        const data = await StreamModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "episodes",
+                    localField: "episode_id",
+                    foreignField: "_id",
+                    as: "episode_record",
+                },
+            }, 
+            {
+                $lookup: {
+                    from: "seasons", // Collection name for seasons
+                    let: { seasonId: "$episode_record.season_id" },
+                   
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $in: ["$_id", "$$seasonId"] },
+                        },
+                      },
+                    ],
+                   
+                    as: "season_record"
+                }
+            },
+            // {
+            //     $project: {
+            //         _id: 0,
+            //         seasons: 1
+            //     }
+            // }
+
+        ]);
+        return data;
+    },
+    getUser: async (id) => {
+        const data = await StreamModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user_id",
+                    foreignField: "_id",
+                    as: "user",
+                },
+            },
+        ]);
+        return data;
+    },
+    getEpisode: async (id) => {
+        const data = await StreamModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "episodes",
+                    localField: "episode_id",
+                    foreignField: "_id",
+                    as: "episode",
+                },
+            },
+        ]);
+        return data;
 
 
     },
 
+    add: async (body) => {
+        const data = StreamModel.create(body);
+        return data;
+    },
+
     delete: async (id) => {
-        // console.log('deleted request');
-        // console.log(req);
+
         const streams = await StreamModel.find()
 
-        // console.log(users);
         for (const stream of streams) {
 
             if (stream.id === id) {
@@ -67,12 +243,10 @@ export const StreamService = {
 
         const streams = await StreamModel.find()
 
-        console.log(streams);
         for (const stream of streams) {
 
             if (stream.id === id) {
-                console.log(body.time);
-                
+
                 const timeStream = await StreamModel.findById(id);
 
                 if (timeStream) {
@@ -80,19 +254,15 @@ export const StreamService = {
                     if (body.time) {
                         timeStream.time = body.time;
                     }
-                   
 
                     await timeStream.save();
                     return timeStream;
 
                 }
-            } 
+            }
 
 
         }
-
-
-
     }
 
 };

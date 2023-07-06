@@ -7,6 +7,7 @@ const router = express.Router();
 // router.get("/", authenticate, GenreController.getAll);
 router.get("/",authenticate, SeasonController.getAll);
 router.get("/:id",authenticate, SeasonController.get);
+router.get("/:id/episodes",authenticate, SeasonController.getEpisodes);
 router.post("/", validate(SeasonValidationSchema.add), SeasonController.add);
 router.delete("/:id",authenticate, SeasonController.delete);
 router.patch("/:id",authenticate, SeasonController.update);

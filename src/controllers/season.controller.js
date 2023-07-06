@@ -26,6 +26,20 @@ export const SeasonController = {
             return httpResponse.INTERNAL_SERVER_ERROR(res, error);
         }
     },
+    getEpisodes: async (req,res)=>{
+        try {
+            const data = await SeasonService.getEpisodes(req.params.id);
+            if (!data) {
+                return httpResponse.NOT_FOUND(res, data)
+            }
+            else {
+                return httpResponse.SUCCESS(res, data);
+            }
+
+        } catch (error) {
+            return httpResponse.INTERNAL_SERVER_ERROR(res, error);
+        }
+    },
 
     add: async (req, res) => {
         try {

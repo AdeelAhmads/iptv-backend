@@ -1,6 +1,7 @@
 import { SeriesModel } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import passwordHash from 'password-hash';
+import mongoose from "mongoose";
 export const SeriesService = {
     getAll: async () => {
         return SeriesModel.find();
@@ -16,26 +17,65 @@ export const SeriesService = {
             if (series.id === id) {
                 return await SeriesModel.findById(id);
             }
-           
+
         }
 
     },
+    getSeasons: async (id) => {
+        const data = await SeriesModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "seasons",
+                    localField: "_id",
+                    foreignField: "series_id",
+                    as: "seasons_record",
+                },
+            },
+        ]);
+        return data;
+    },
+    getEpisodes: async (id) => {
+        console.log(id);
+        const data = await SeriesModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                },
+            },
+            {
+                $lookup: {
+                    from: "seasons",
+                    localField: "_id",
+                    foreignField: "series_id",
+                    as: "season_record"
+                },
+            },
 
+            {
+                $lookup: {
+                    from: "episodes", 
+                    localField: "season_record._id",
+                    foreignField: "episodes.episodes_id",
+                    as: "episodes"
+                }
+            },
+           
+
+        ]);
+        return data;
+    },
     add: async (body) => {
         let data;
         data = await SeriesModel.find({ name: body.name });
-        // Secret key used to sign the token
+       
         if (data.length == 0) {
             const data = SeriesModel.create(body);
             // const token = jwt.sign(body, secretKey);
-            // const hashedPassword = passwordHash.generate(body.password);
-            // delete body.password;
-            // body.password = hashedPassword;
-
-
-            // console.log(data);
-
-            // data.token = token;
             console.log('data');
             return data;
         }
@@ -46,12 +86,9 @@ export const SeriesService = {
 
     },
 
-    delete: async (id) => {
-        // console.log('deleted request');
-        // console.log(req);
-        const seriess = await SeriesModel.find()
 
-        // console.log(users);
+    delete: async (id) => {
+        const seriess = await SeriesModel.find()
         for (const series of seriess) {
 
             if (series.id === id) {
@@ -75,10 +112,10 @@ export const SeriesService = {
                     if (body.name) {
                         series.name = body.name;
                     }
-                    if(body.description) {
+                    if (body.description) {
                         series.description = body.description;
                     }
-                    if(body.trailer){
+                    if (body.trailer) {
                         series.trailer = body.trailer;
                     }
 
